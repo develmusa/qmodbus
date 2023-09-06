@@ -1,0 +1,48 @@
+name: Build and Release
+
+on:
+  release:
+    types: [created]
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        # Add any other architectures or OS versions you'd like to build for
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Install Qt (Ubuntu)
+      if: runner.os == 'Linux'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y qt5-default
+
+    - name: Install Qt (macOS)
+      if: runner.os == 'macOS'
+      run: |
+        brew install qt5
+        export PATH="/usr/local/opt/qt/bin:$PATH"
+
+    - name: Install Qt (Windows)
+      if: runner.os == 'Windows'
+      run: |
+        # Add steps to install Qt on Windows, if necessary
+
+    - name: Build project
+      run: |
+        mkdir build
+        cd build
+        qmake ..
+        make
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: my-artifact-${{ matrix.os }}
+        path: build/ # Adjust this to where your build outputs
